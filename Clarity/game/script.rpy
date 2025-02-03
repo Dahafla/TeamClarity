@@ -1,4 +1,4 @@
-﻿# The script of the game goes in this file.
+# The script of the game goes in this file.
 
 # Declare characters used by this game. The color argument colorizes the
 # name of the character.
@@ -112,7 +112,7 @@ label start:
             "Lie back down":
                 jump lie_down
     
-    label standup:
+    label stand_up:
         scene bg 8
         e "The floor is cold but I am standing, that's a start"
         jump ending1
