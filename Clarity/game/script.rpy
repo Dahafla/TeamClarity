@@ -3,14 +3,36 @@
 # Declare characters used by this game. The color argument colorizes the
 # name of the character.
 
-define e = Character("Main Character")
+define e = Character(" ")
+
+
+default emotion = 50
+
+screen emotion_bar():
+    frame:
+        align (0.1, 0.1)
+        xsize 300
+        ysize 50
+        background "#000000"
+        padding (5, 5)
+        bar:
+            value emotion
+            range 100
+            xsize 290
+            ysize 40
+            left_bar "#FFFFFF"  
+            right_bar "#CCCCCC"  
+            thumb None
+
 
 
 # The game starts here.
 
 label start:
 
-    scene bg 1 #Scene 1
+    show screen emotion_bar
+
+    scene bg 1 with fade #Scene 1
 
     e "I am awake, I know I am awake but I still lay here pretending to be asleep"
 
@@ -18,7 +40,6 @@ label start:
         scene bg 2 # scene 2
 
         e "The alarm clock continues it's buzzing, heavy as the day ahead"
-
         menu:
             "Snooze the alarm":
                 jump snooze_alarm
@@ -26,12 +47,18 @@ label start:
             "Turn off the alarm":
                 jump turn_off_alarm
 
+
     label snooze_alarm:
         e "Just a few more minutes"
-        jump scene2
+        $ emotion -= 20
+        if emotion > 0:
+            jump scene2
+        else:
+            jump ending2
 
     label turn_off_alarm:
         e "I turn it off, but the weight of the day still lingers."
+        $ emotion += 10
         jump scene3
 
 
@@ -48,9 +75,15 @@ label start:
     
     label stay_in_bed:
         e "I will just stay here, for a while"
-        jump scene3
+        $ emotion -= 25
+        if emotion > 0:
+            jump scene3
+        else:
+            jump ending2
+
     
     label open_the_curtains:
+        $ emotion += 30
         jump scene4
 
     #scene 4
@@ -76,11 +109,16 @@ label start:
         "I force myself to take the glass. 
         The cold water is soothing.
         It's a small gesture but it helps"
+        $ emotion += 10
         jump scene6
     
     label leave_it:
         "It's too much, I will just stay here"
-        jump scene6
+        $ emotion -= 15
+        if emotion > 0:
+            jump scene6
+        else:
+            jump ending2
 
     label scene6:
         scene bg 6
@@ -97,13 +135,19 @@ label start:
     label read_paper:
         e "Mom's words feel distant, but they remind me of better days.
         Maybe I can feel that again someday"
+        $ emotion += 50
         jump scene7
     
     label leave_paper_alone:
         "I can't do it, not today"
-        jump scene6
+        $ emotion -= 50
+        if emotion > 0:
+            jump scene6
+        else:
+            jump ending2
     
     label scene7:
+        hide screen emotion_bar
         scene bg 7
         menu:
             "stand up":
@@ -123,12 +167,14 @@ label start:
         jump ending2
     
     label ending1:
-        scene ending 1
+        hide screen emotion_bar
+        scene ending 1 with dissolve
         e "Every small step matters. I have made it this far and I can keep going."
         return
 
     label ending2:
-        scene ending 2
+        hide screen emotion_bar
+        scene ending 2 with dissolve
         e "It's okay to not be ready. Tomorrow is another day."
         return
 
