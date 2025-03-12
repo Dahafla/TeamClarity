@@ -14,6 +14,7 @@ screen emotion_bar():
         xsize 300
         ysize 50
         background "#000000"
+        padding (5, 5)
         bar:
             value emotion
             range 100
