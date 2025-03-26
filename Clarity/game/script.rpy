@@ -3,7 +3,7 @@
 # Declare characters used by this game. The color argument colorizes the
 # name of the character.
 
-define e = Character(" ")
+define e = Character(" ", color="#FFFFFF")
 
 
 default emotion = 50
@@ -20,52 +20,75 @@ screen emotion_bar():
             range 100
             xsize 290
             ysize 40
-            left_bar "#FFFFFF"  
+            left_bar Color(emotion_color(emotion))
             right_bar "#CCCCCC"  
             thumb None
 
+init python:
+    def emotion_color(value):
+        if value > 50:
+            return "#00FF00"
+        elif value > 25:
+            return "#FFFF00"
+        else:
+            return "#FF0000" 
 
 
+define fade_time = 2.0
 # The game starts here.
 
 label start:
 
-    show screen emotion_bar
 
     scene bg 1 with fade #Scene 1
+    show screen emotion_bar with fade
 
-    e "I am awake, I know I am awake but I still lay here pretending to be asleep"
+    e "I am awake. I know I am awake but I still lay here pretending to be asleep"
+
+    default snooze_count = 0
 
     label scene2:
-        scene bg 2 # scene 2
 
-        e "The alarm clock continues it's buzzing, heavy as the day ahead"
+        if snooze_count == 0:
+
+            scene bg 2 with fade # scene 2
+            e "The alarm clock buzzes. The sound is distant, like it belongs to someone else."
+
+        elif snooze_count == 1:
+            scene bg 2a with fade
+            e "The buzzing continues. A little louder this time."
+
+        elif snooze_count == 2:
+            scene bg 2b with fade
+            e "The alarm is relentless. It's impossible to ignore now."
+
         menu:
-            "Snooze the alarm":
-                jump snooze_alarm
+                "Snooze the alarm":
+                    jump snooze_alarm
 
-            "Turn off the alarm":
-                jump turn_off_alarm
-
+                "Turn off the alarm":
+                    jump turn_off_alarm
 
     label snooze_alarm:
+        $ snooze_count += 1
         e "Just a few more minutes"
         $ emotion -= 20
+
         if emotion > 0:
             jump scene2
         else:
             jump ending2
 
     label turn_off_alarm:
-        e "I turn it off, but the weight of the day still lingers."
+        e "I turn it off. Silence fills the room, but the weight of the day still lingers."
         $ emotion += 10
         jump scene3
 
 
     # scene 3
     label scene3:
-        scene bg 3
-        e "I look around the room, it feels like a stranger. Messy.Cold"
+        scene bg 3 with fade
+        e "My room feels foreign. Messy. Cold. Like it belongs to someone else."
         menu:
             "Stay in bed":
                 jump stay_in_bed
@@ -74,7 +97,7 @@ label start:
                 jump open_the_curtains
     
     label stay_in_bed:
-        e "I will just stay here, for a while"
+        e "Maybe if I stay still, the world will move on without me"
         $ emotion -= 25
         if emotion > 0:
             jump scene3
@@ -88,16 +111,14 @@ label start:
 
     #scene 4
     label scene4:
-        scene bg 4
-        e "Sunlight peeks through, it's harsh but I feel a little warm"
+        scene bg 4 with fade
+        e "Sunlight peeks through. It's too real, too harsh but I feel a little warm"
         jump scene5
     
     #scene 5
     label scene5:
-        scene bg 5
-        e "My mouse is dry. A glass of water sits within reach-but the steps feel steeper than they should.
-        Is it worth the effort?"
-
+        scene bg 5 with fade
+        e "My mouth is dry. A glass of water is within reach, but the distance feels impossible."
         menu:
             "Take the water":
                 jump take_the_water
@@ -106,14 +127,12 @@ label start:
                 jump leave_it
     
     label take_the_water:
-        "I force myself to take the glass. 
-        The cold water is soothing.
-        It's a small gesture but it helps"
+        e "The water is cold. It feels like proof that I exist."
         $ emotion += 10
         jump scene6
     
     label leave_it:
-        "It's too much, I will just stay here"
+        "Not today. Maybe later. Maybe never."
         $ emotion -= 15
         if emotion > 0:
             jump scene6
@@ -121,9 +140,9 @@ label start:
             jump ending2
 
     label scene6:
-        scene bg 6
-        e "I see a crumbled piece of paper- not behind the door, not locked away.
-        But to reach it, I have to open the door. I know it's her handwriting"
+        scene bg 6 with fade
+        e "A crumpled piece of paper sits by the door. Her handwriting."
+        e "To reach it, I would have to open the door. Step out. Face the world."
 
         menu:
             "Read the piece of paper":
@@ -133,13 +152,13 @@ label start:
                 jump leave_paper_alone
     
     label read_paper:
-        e "Mom's words feel distant, but they remind me of better days.
-        Maybe I can feel that again someday"
+        e "Mom's words feel distant, but familiar."
+        e "Like echoes of a past where things felt lighter. Maybe I could feel that again. Someday."
         $ emotion += 50
         jump scene7
     
     label leave_paper_alone:
-        "I can't do it, not today"
+        "Not today."
         $ emotion -= 50
         if emotion > 0:
             jump scene6
@@ -148,7 +167,7 @@ label start:
     
     label scene7:
         hide screen emotion_bar
-        scene bg 7
+        scene bg 7 with fade
         menu:
             "stand up":
                 jump stand_up
@@ -157,19 +176,19 @@ label start:
                 jump lie_down
     
     label stand_up:
-        scene bg 8
-        e "The floor is cold but I am standing, that's a start"
+        scene bg 8 with fade
+        e "The floor is cold. But I am standing, that's a start"
         jump ending1
     
     label lie_down:
-        scene bg 9
+        scene bg 9 with fade
         e "It's too much today, maybe tomorrow."
         jump ending2
     
     label ending1:
         hide screen emotion_bar
         scene ending 1 with dissolve
-        e "Every small step matters. I have made it this far and I can keep going."
+        e "Every small step matters. I have made it this far. I can keep going."
         return
 
     label ending2:
@@ -178,4 +197,3 @@ label start:
         e "It's okay to not be ready. Tomorrow is another day."
         return
 
-    
