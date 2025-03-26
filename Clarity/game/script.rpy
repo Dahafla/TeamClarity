@@ -24,6 +24,7 @@ screen emotion_bar():
             right_bar "#CCCCCC"  
             thumb None
 
+# python funct
 init python:
     def emotion_color(value):
         if value > 50:
