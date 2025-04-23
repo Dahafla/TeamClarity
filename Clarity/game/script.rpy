@@ -1,5 +1,5 @@
 
-define e = Character(" ", color="#FFFFFF")
+define e = Character(" ", color="#FFFFFF", voice="audio/vocalize.mp3")
 
 
 default emotion = 50 # starting emotion variable and value
@@ -7,6 +7,7 @@ default timer_active = False #timer boolean
 default emotion_decrease = 0
 default emotion_reason = "" #initialize emotion_reason
 
+#create the emotion bar
 screen emotion_bar():
     frame:
         align (0.1, 0.1)
@@ -22,6 +23,10 @@ screen emotion_bar():
             left_bar Color(emotion_color(emotion))
             right_bar "#CCCCCC"  
             thumb None
+            at transform:
+                on change:
+                    alpha 0.7
+                    linear 0.3 alpha 1.0
 
 # show message after emotion goes up or down
 screen emotion_transition(message):
@@ -41,7 +46,7 @@ screen emotion_transition(message):
 
 # python function
 init python:
-
+    #dynamic emotion bar color change
     def emotion_color(value):
         if value > 50:
             return "#00FF00"
@@ -66,20 +71,26 @@ init python:
         emotion_reason = reason
         renpy.call_in_new_context("emotion_explanation", reason = reason)
 
+#for transitions
 define fade_time = 2.0
-# The game starts here.
 
+#function for screen showing emotion reason
 label emotion_explanation(reason):
     show screen emotion_transition(reason) with dissolve
     $ renpy.pause(3.0)  # Screen stays for 2 seconds
     hide screen emotion_transition with fade
     return
 
+# The game starts here.
 label start:
     #scene 1
     scene bg 1 #Scene 1
     show screen emotion_bar 
 
+    #alarm sfx
+    play music "alarm.mp3" fadein 1.0 
+    #breathing
+    play sound "breathing.ogg" loop fadein 2.0 volume 0.3
     e "I am awake. I know I am awake but I still lay here pretending to be asleep"
 
     default snooze_count = 0
@@ -93,21 +104,28 @@ label start:
         if snooze_count == 0:
 
             scene bg 2 with fade # scene 2
+            play sound "bedrustle.mp3"
             e "The alarm clock buzzes. The sound is distant, like it belongs to someone else."
 
         elif snooze_count == 1:
             scene bg 2a with fade
+            play sound "bed rustle.ogg" volume 0.7
             e "The buzzing continues. A little louder this time."
 
         elif snooze_count == 2:
             scene bg 2b with fade
+            play sound "bed rustle2.ogg"
             e "The alarm is relentless. It's impossible to ignore now."
 
         menu:
                 "Snooze the alarm":
+                    play sound "ui_click"
+                    pause 0.5
                     jump snooze_alarm
 
                 "Turn off the alarm":
+                    play sound "ui_click"
+                    pause 0.5
                     #$ timer_active = False
                     jump turn_off_alarm
         #idle timer
@@ -122,8 +140,17 @@ label start:
     label snooze_alarm:
         $ timer_active = False
         $ snooze_count += 1
+
+        stop music fadeout 0.5
+        play sound "snooze.mp3"
+
         e "Just a few more minutes"
         $ change_emotion( -20, "Avoiding the day feels easier… but it adds to the weight you're already carrying.")
+
+        #change alarm volume each snooze
+        $ alarm_volume = 0.5 + (snooze_count * 0.5)
+        play music "alarm.mp3" volume alarm_volume fadein 1.0
+
         $ renpy.pause(2.0)
         if emotion > 0:
             jump scene2
@@ -132,6 +159,9 @@ label start:
 
     #choice 2
     label turn_off_alarm:
+        stop music fadeout 0.1
+        stop sound 
+        play sound "snooze.mp3"
         e "I turn it off. Silence fills the room, but the weight of the day still lingers."
         $ change_emotion ( 10, "You didn't want to get up. But you did. That matters.")
         jump scene3
@@ -140,15 +170,19 @@ label start:
     # scene 3
     label scene3:
         scene bg 3 with fade
+        play sound "clock ticking.mp3"
         e "My room feels foreign. Messy. Cold. Like it belongs to someone else."
         menu:
             "Stay in bed":
+                pause 0.5
                 jump stay_in_bed
 
             "Open the curtains":
+                pause 0.5
                 jump open_the_curtains
     
     label stay_in_bed:
+        play sound "bed creak.mp3"
         e "Maybe if I stay still, the world will move on without me"
         $ change_emotion( -25, "When you shut out the world, it doesn't stop but your world gets smaller.")
         if emotion > 0:
@@ -158,12 +192,15 @@ label start:
 
     
     label open_the_curtains:
+        stop sound 
+        play sound "curtains.mp3"
         $ change_emotion(30, "It's just light. But to someone in the dark, it's a step toward living again")
         jump scene4
 
     #scene 4
     label scene4:
         scene bg 4 with fade
+        play sound "birds.ogg" fadein .5
         e "Sunlight peeks through. It's too real, too harsh but I feel a little warm"
         jump scene5
     
@@ -173,9 +210,11 @@ label start:
         e "My mouth is dry. A glass of water is within reach, but the distance feels impossible."
         menu:
             "Take the water":
+                pause 0.5
                 jump take_the_water
 
             "Leave it":
+                pause 0.5
                 jump leave_it
     
     label take_the_water:
@@ -198,9 +237,11 @@ label start:
 
         menu:
             "Read the piece of paper":
+                pause 0.5
                 jump read_paper
 
             "leave it alone":
+                pause 0.5
                 jump leave_paper_alone
     
     label read_paper:
@@ -222,9 +263,11 @@ label start:
         scene bg 7 with fade
         menu:
             "stand up":
+                pause 0.5
                 jump stand_up
 
             "Lie back down":
+                pause 0.5
                 jump lie_down
     
     label stand_up:
@@ -241,11 +284,18 @@ label start:
         hide screen emotion_bar
         scene ending 1 with dissolve
         e "Every small step matters. I have made it this far. I can keep going."
+        jump thanks
         return
 
     label ending2:
         hide screen emotion_bar
         scene ending 2 with dissolve
         e "It's okay to not be ready. Tomorrow is another day."
+        jump thanks
         return
 
+    label thanks:
+        hide screen emotion_bar
+        scene thanks with dissolve
+        pause
+        return
